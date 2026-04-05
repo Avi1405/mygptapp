@@ -1,20 +1,16 @@
-# FIFA World Cup 2026 Official Key Fixtures (Static MVP)
+# FIFA World Cup 2026 Full Match Schedule (Static MVP)
 
-A fast, SEO-first static website for browsing FIFA-verified key FIFA World Cup 2026 fixtures in the visitor's local timezone.
+A fast, SEO-first static website for browsing FIFA World Cup 2026 match numbers (1-104) based on official FIFA schedule structure in the visitor's local timezone.
 
 ## Files
 
 - `index.html` – semantic page structure, SEO tags, and source links to FIFA official schedule pages.
 - `styles.css` – responsive and mobile-friendly styling.
-- `app.js` – FIFA-verified key fixture data, local timezone conversion, filters, and JSON-LD rendering.
+- `app.js` – complete 104-match data model, local timezone conversion, filters, and JSON-LD rendering.
 
 ## Features
 
-- Displays FIFA-verified anchor fixtures:
-  - Opening match
-  - Semifinals
-  - Third-place match
-  - Final
+- Displays all FIFA World Cup 2026 match numbers (1-104) with stage mapping
 - Local timezone kickoff display based on browser settings.
 - Flag icons shown for confirmed teams.
 - Country filter (`All countries` default, matching home or away team).

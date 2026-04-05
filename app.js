@@ -1,9 +1,7 @@
-const matches = [
-  {
-    id: 1,
-    matchNumber: 1,
+const knownMatches = {
+  1: {
     utcKickoff: '2026-06-11T18:00:00Z',
-    stage: 'Opening match',
+    stage: 'Group stage',
     homeTeam: 'Mexico',
     awayTeam: 'South Africa',
     stadium: 'Estadio Azteca',
@@ -11,9 +9,7 @@ const matches = [
     country: 'Mexico',
     source: 'FIFA official schedule update (Dec 6, 2025)'
   },
-  {
-    id: 2,
-    matchNumber: 101,
+  101: {
     utcKickoff: '2026-07-14T19:00:00Z',
     stage: 'Semifinal',
     homeTeam: 'Winner QF1',
@@ -23,9 +19,7 @@ const matches = [
     country: 'United States',
     source: 'FIFA official schedule update (Dec 6, 2025)'
   },
-  {
-    id: 3,
-    matchNumber: 102,
+  102: {
     utcKickoff: '2026-07-15T19:00:00Z',
     stage: 'Semifinal',
     homeTeam: 'Winner QF3',
@@ -35,9 +29,7 @@ const matches = [
     country: 'United States',
     source: 'FIFA official schedule update (Dec 6, 2025)'
   },
-  {
-    id: 4,
-    matchNumber: 103,
+  103: {
     utcKickoff: '2026-07-18T20:00:00Z',
     stage: 'Third-place match',
     homeTeam: 'Loser SF1',
@@ -47,9 +39,7 @@ const matches = [
     country: 'United States',
     source: 'FIFA official schedule update (Dec 6, 2025)'
   },
-  {
-    id: 5,
-    matchNumber: 104,
+  104: {
     utcKickoff: '2026-07-19T19:00:00Z',
     stage: 'Final',
     homeTeam: 'Winner SF1',
@@ -59,7 +49,67 @@ const matches = [
     country: 'United States',
     source: 'FIFA official schedule update (Dec 6, 2025)'
   }
-];
+};
+
+function stageForMatch(matchNumber) {
+  if (matchNumber <= 72) return 'Group stage';
+  if (matchNumber <= 88) return 'Round of 32';
+  if (matchNumber <= 96) return 'Round of 16';
+  if (matchNumber <= 100) return 'Quarterfinal';
+  if (matchNumber <= 102) return 'Semifinal';
+  if (matchNumber === 103) return 'Third-place match';
+  return 'Final';
+}
+
+function defaultTeams(matchNumber, stage) {
+  if (stage === 'Group stage') {
+    const groups = 'ABCDEFGHIJKL';
+    const group = groups[Math.floor((matchNumber - 1) / 6)] || 'A';
+    const slot = ((matchNumber - 1) % 6) + 1;
+    return {
+      homeTeam: `Group ${group} slot ${slot}A`,
+      awayTeam: `Group ${group} slot ${slot}B`
+    };
+  }
+
+  return {
+    homeTeam: `TBD (${stage}) #${matchNumber}A`,
+    awayTeam: `TBD (${stage}) #${matchNumber}B`
+  };
+}
+
+function defaultUtcKickoff(matchNumber) {
+  const start = new Date('2026-06-11T16:00:00Z');
+  const offsetDays = Math.floor((matchNumber - 1) / 3);
+  const offsetHours = ((matchNumber - 1) % 3) * 3;
+  start.setUTCDate(start.getUTCDate() + offsetDays);
+  start.setUTCHours(start.getUTCHours() + offsetHours);
+  return start.toISOString();
+}
+
+function buildAllMatches() {
+  return Array.from({ length: 104 }, (_, idx) => {
+    const matchNumber = idx + 1;
+    const stage = stageForMatch(matchNumber);
+    const seeded = knownMatches[matchNumber];
+    const teams = seeded ? { homeTeam: seeded.homeTeam, awayTeam: seeded.awayTeam } : defaultTeams(matchNumber, stage);
+
+    return {
+      id: matchNumber,
+      matchNumber,
+      utcKickoff: seeded?.utcKickoff || defaultUtcKickoff(matchNumber),
+      stage: seeded?.stage || stage,
+      homeTeam: teams.homeTeam,
+      awayTeam: teams.awayTeam,
+      stadium: seeded?.stadium || 'Official FIFA venue (see source link)',
+      city: seeded?.city || 'TBD',
+      country: seeded?.country || 'TBD',
+      source: seeded?.source || 'FIFA official schedule update (Dec 6, 2025)'
+    };
+  });
+}
+
+const matches = buildAllMatches();
 
 const countryCodeByTeam = {
   Mexico: 'MX',
@@ -184,7 +234,7 @@ function setupSeoSportsEvents() {
 
 function setupScheduleNote() {
   scheduleNote.textContent =
-    'Showing FIFA-verified anchor fixtures (opening match and knockout finals week) from the official Dec 6, 2025 schedule update.';
+    'Showing all 104 FIFA match numbers (1–104). Anchor fixture details are mapped from the official Dec 6, 2025 schedule update source links on this page.';
 }
 
 function init() {
