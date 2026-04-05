@@ -1,26 +1,25 @@
-# FIFA World Cup 2026 Schedule (Static MVP)
+# FIFA World Cup 2026 Official Key Fixtures (Static MVP)
 
-A fast, SEO-first static website for browsing the FIFA World Cup 2026 schedule in the visitor's local timezone.
+A fast, SEO-first static website for browsing FIFA-verified key FIFA World Cup 2026 fixtures in the visitor's local timezone.
 
 ## Files
 
-- `index.html` – semantic page structure, SEO tags, and JSON-LD.
+- `index.html` – semantic page structure, SEO tags, and source links to FIFA official schedule pages.
 - `styles.css` – responsive and mobile-friendly styling.
-- `app.js` – seeded match data, local timezone conversion, filters, and section rendering.
+- `app.js` – FIFA-verified key fixture data, local timezone conversion, filters, and JSON-LD rendering.
 
 ## Features
 
-- Full schedule list from local seeded data (no API/backend).
+- Displays FIFA-verified anchor fixtures:
+  - Opening match
+  - Semifinals
+  - Third-place match
+  - Final
 - Local timezone kickoff display based on browser settings.
-- Flag icons shown for teams in schedule cards and filter options.
+- Flag icons shown for confirmed teams.
 - Country filter (`All countries` default, matching home or away team).
-- Dedicated sections for:
-  - Today’s matches (local date)
-  - Upcoming next 24 hours
-- Empty states when no results are available.
-- Sticky mobile-friendly filter controls.
-- Optional “My Team” quick filter saved in `localStorage`.
-- SEO-focused metadata and FAQ content.
+- SEO-focused metadata and `SportsEvent` JSON-LD.
+- Links to official FIFA schedule sources.
 
 ## Run locally (any static server)
 
@@ -46,4 +45,4 @@ Open the folder and start **Live Server** on `index.html`.
 
 ## Deployment
 
-Deploy the four files as-is to any static host (GitHub Pages, Netlify, Cloudflare Pages, Vercel static output, S3, etc.).
+Deploy the files as-is to any static host (GitHub Pages, Netlify, Cloudflare Pages, Vercel static output, S3, etc.).
