@@ -118,6 +118,10 @@ function getTeamLabel(team) {
   return `${flag} ${team}`;
 }
 
+function isCountryTeam(team) {
+  return countryCodeByTeam[team] && countryCodeByTeam[team] !== 'UN';
+}
+
 function getLocalKickoff(utcString) {
   const date = new Date(utcString);
   return date.toLocaleString(undefined, {
@@ -163,8 +167,8 @@ function renderSchedule() {
 function buildCountryFilter() {
   const teams = new Set();
   matches.forEach((match) => {
-    teams.add(match.homeTeam);
-    teams.add(match.awayTeam);
+    if (isCountryTeam(match.homeTeam)) teams.add(match.homeTeam);
+    if (isCountryTeam(match.awayTeam)) teams.add(match.awayTeam);
   });
 
   [...teams].sort().forEach((team) => {
