@@ -92,11 +92,18 @@ h1 {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.controls,
+.match-card,
+.bookmark-cta {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
 .controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
   margin-top: 1.2rem;
+  padding: 1rem;
 }
 
 .sticky-controls {
@@ -105,71 +112,19 @@ h1 {
   z-index: 5;
 }
 
-.timezone-card,
-.filter-card,
-.match-card,
-.bookmark-cta,
-.faq-section article {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow);
-}
-
-.timezone-card,
-.filter-card {
-  padding: 1rem;
-}
-
-.timezone-card h2,
-.filter-card h2 {
+.controls h2 {
   font-size: 1rem;
   margin: 0 0 0.5rem;
 }
 
-.timezone-label {
-  margin: 0;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-select,
-button {
+select {
   width: 100%;
   border-radius: 8px;
   border: 1px solid var(--border);
   font: inherit;
-}
-
-select {
   margin-top: 0.1rem;
   padding: 0.6rem 0.65rem;
   background: #fff;
-}
-
-button {
-  cursor: pointer;
-  margin-top: 0.55rem;
-  padding: 0.6rem 0.75rem;
-}
-
-.secondary-btn {
-  background: var(--accent-soft);
-  border-color: #b6d0ec;
-  color: #143f68;
-  font-weight: 600;
-}
-
-.text-btn {
-  background: transparent;
-  color: var(--muted);
-}
-
-.saved-team-note {
-  min-height: 1.2rem;
-  margin: 0.4rem 0 0;
-  color: var(--accent);
-  font-size: 0.9rem;
 }
 
 .content-section {
@@ -231,31 +186,13 @@ button {
 
 .bookmark-cta {
   margin-top: 1.5rem;
+  margin-bottom: 2rem;
   padding: 1rem;
   border-left: 5px solid var(--accent);
 }
 
 .bookmark-cta p {
   margin: 0;
-}
-
-.faq-section {
-  margin-bottom: 2rem;
-}
-
-.faq-section article {
-  margin-top: 0.85rem;
-  padding: 0.9rem;
-}
-
-.faq-section h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.faq-section p {
-  margin: 0.5rem 0 0;
-  color: #3a475b;
 }
 
 .sr-only {
@@ -266,20 +203,6 @@ button {
   margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   border: 0;
-}
-
-@media (max-width: 760px) {
-  .controls {
-    grid-template-columns: 1fr;
-    top: 0;
-  }
-
-  .anchor-nav {
-    gap: 0.55rem;
-  }
-
-  .anchor-nav a {
-    font-size: 0.85rem;
-  }
 }
