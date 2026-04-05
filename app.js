@@ -91,6 +91,28 @@ const matches = [
   }
 ];
 
+const countryCodeByTeam = {
+  Argentina: 'AR',
+  Australia: 'AU',
+  Brazil: 'BR',
+  Canada: 'CA',
+  Croatia: 'HR',
+  England: 'GB',
+  France: 'FR',
+  Germany: 'DE',
+  Ghana: 'GH',
+  Japan: 'JP',
+  Mexico: 'MX',
+  Morocco: 'MA',
+  Netherlands: 'NL',
+  Portugal: 'PT',
+  Serbia: 'RS',
+  'South Korea': 'KR',
+  Spain: 'ES',
+  'United States': 'US',
+  Uruguay: 'UY'
+};
+
 const storageKey = 'wc2026MyTeam';
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const countryFilter = document.getElementById('country-filter');
@@ -106,6 +128,20 @@ const upcomingList = document.getElementById('upcoming-list');
 const scheduleEmpty = document.getElementById('schedule-empty');
 const todayEmpty = document.getElementById('today-empty');
 const upcomingEmpty = document.getElementById('upcoming-empty');
+
+function toFlagEmoji(code) {
+  if (!code) return '🏳️';
+  return code
+    .toUpperCase()
+    .split('')
+    .map((char) => String.fromCodePoint(127397 + char.charCodeAt()))
+    .join('');
+}
+
+function getTeamLabel(team) {
+  const flag = toFlagEmoji(countryCodeByTeam[team]);
+  return `${flag} ${team}`;
+}
 
 function getLocalKickoff(utcString) {
   const date = new Date(utcString);
@@ -131,7 +167,7 @@ function buildMatchCard(match) {
   article.className = 'match-card';
 
   article.innerHTML = `
-    <h3 class="match-title">${match.homeTeam} vs ${match.awayTeam}</h3>
+    <h3 class="match-title">${getTeamLabel(match.homeTeam)} vs ${getTeamLabel(match.awayTeam)}</h3>
     <p class="match-meta"><strong>Stage:</strong> ${match.stage}</p>
     <p class="match-meta"><strong>Venue:</strong> ${match.stadium}, ${match.city}</p>
     <p class="match-kickoff">Kickoff: ${getLocalKickoff(match.utcKickoff)}</p>
@@ -188,7 +224,7 @@ function buildCountryFilter() {
   [...teams].sort().forEach((team) => {
     const option = document.createElement('option');
     option.value = team;
-    option.textContent = team;
+    option.textContent = getTeamLabel(team);
     countryFilter.appendChild(option);
   });
 

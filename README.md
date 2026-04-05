@@ -12,6 +12,7 @@ A fast, SEO-first static website for browsing the FIFA World Cup 2026 schedule i
 
 - Full schedule list from local seeded data (no API/backend).
 - Local timezone kickoff display based on browser settings.
+- Flag icons shown for teams in schedule cards and filter options.
 - Country filter (`All countries` default, matching home or away team).
 - Dedicated sections for:
   - Today’s matches (local date)
