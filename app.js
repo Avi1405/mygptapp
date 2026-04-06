@@ -59,10 +59,61 @@ let matches = [];
 let sourceVersionLabel = 'FIFA schedule v4 - Jan 14, 2026';
 
 const countryCodeByTeam = {
+  Algeria: 'DZ',
+  Argentina: 'AR',
+  Australia: 'AU',
+  Austria: 'AT',
+  Belgium: 'BE',
+  'Bosnia-Herzegovina': 'BA',
+  Brazil: 'BR',
+  'Cabo Verde': 'CV',
+  Canada: 'CA',
+  Colombia: 'CO',
+  'Congo DR': 'CD',
+  "Côte d'Ivoire": 'CI',
+  Croatia: 'HR',
+  Curaçao: 'CW',
+  Czechia: 'CZ',
+  Ecuador: 'EC',
+  Egypt: 'EG',
+  England: 'GB',
+  France: 'FR',
+  Germany: 'DE',
+  Ghana: 'GH',
+  Haiti: 'HT',
+  'IR Iran': 'IR',
+  Iraq: 'IQ',
+  Japan: 'JP',
+  Jordan: 'JO',
   Mexico: 'MX',
+  Morocco: 'MA',
+  Netherlands: 'NL',
+  'New Zealand': 'NZ',
+  Norway: 'NO',
+  Panama: 'PA',
+  Paraguay: 'PY',
+  Portugal: 'PT',
+  Qatar: 'QA',
+  'Saudi Arabia': 'SA',
+  Scotland: 'GB',
+  Senegal: 'SN',
   'South Africa': 'ZA',
+  'South Korea': 'KR',
+  Spain: 'ES',
+  Sweden: 'SE',
+  Switzerland: 'CH',
+  Tunisia: 'TN',
+  Türkiye: 'TR',
   USA: 'US',
-  Canada: 'CA'
+  'United States': 'US',
+  Uruguay: 'UY',
+  Uzbekistan: 'UZ',
+  'Korea Republic': 'KR',
+  Turkey: 'TR',
+  'Cote d’Ivoire': 'CI',
+  "Cote d'Ivoire": 'CI',
+  'DR Congo': 'CD',
+  Curacao: 'CW'
 };
 
 const countryByTeam = {
@@ -136,6 +187,11 @@ function toFlagEmoji(code) {
 function getTeamLabel(team) {
   const flag = toFlagEmoji(countryCodeByTeam[team]);
   return `${flag} ${team}`;
+}
+
+function countryLabelWithFlag(name) {
+  const flag = toFlagEmoji(countryCodeByTeam[name]);
+  return `${flag} ${name}`;
 }
 
 function getLocalKickoff(utcString) {
@@ -241,17 +297,17 @@ function buildCountryFilter() {
     const hostCountry = match.country;
 
     if (hostCountry) {
-      options.set(hostCountry, `🌎 ${hostCountry}`);
+      options.set(hostCountry, countryLabelWithFlag(hostCountry));
     }
 
     if (homeCountry) {
-      options.set(homeCountry, homeCountry);
+      options.set(homeCountry, countryLabelWithFlag(homeCountry));
     } else {
       options.set(homeTeam, `🏳️ ${homeTeam}`);
     }
 
     if (awayCountry) {
-      options.set(awayCountry, awayCountry);
+      options.set(awayCountry, countryLabelWithFlag(awayCountry));
     } else {
       options.set(awayTeam, `🏳️ ${awayTeam}`);
     }
@@ -296,17 +352,7 @@ function setupSeoSportsEvents() {
 }
 
 function setupScheduleNote() {
-  const participatingCountries = new Set();
-  matches.forEach((match) => {
-    const homeCountry = countryForTeam(match.homeTeam);
-    const awayCountry = countryForTeam(match.awayTeam);
-    if (homeCountry) participatingCountries.add(homeCountry);
-    if (awayCountry) participatingCountries.add(awayCountry);
-  });
-  const sortedCountries = [...participatingCountries].sort((a, b) => a.localeCompare(b));
-
-  scheduleNote.textContent =
-    `Showing all 104 FIFA match numbers (1–104) from ${sourceVersionLabel}. Countries detected from scheduled teams (${participatingCountries.size}): ${sortedCountries.join(', ')}.`;
+  scheduleNote.textContent = `Showing all 104 FIFA match numbers (1–104) from ${sourceVersionLabel}.`;
 }
 
 async function init() {
