@@ -144,12 +144,58 @@ select {
 .match-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.9rem;
+  gap: 1.2rem;
+}
+
+.day-group {
+  background: #eef3fb;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.85rem;
+}
+
+.day-heading {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  color: #123f66;
+}
+
+.day-match-list {
+  display: grid;
+  gap: 0.7rem;
 }
 
 .match-card {
   padding: 0.95rem;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.search-style-card {
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(15, 76, 129, 0.1);
+}
+
+.fixture-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.fixture-time {
+  margin: 0;
+  font-weight: 700;
+  color: #0c355a;
+}
+
+.fixture-stage {
+  margin: 0;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: #184f7c;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .match-card:hover {
@@ -170,9 +216,10 @@ select {
 }
 
 .match-kickoff {
-  margin-top: 0.55rem;
+  margin-top: 0.45rem;
   color: #143f68;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .empty-state {

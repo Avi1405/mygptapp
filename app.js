@@ -87,6 +87,29 @@ function defaultUtcKickoff(matchNumber) {
   return start.toISOString();
 }
 
+const locationMetadata = {
+  'Atlanta Stadium': { stadium: 'Mercedes-Benz Stadium', city: 'Atlanta', country: 'United States' },
+  'BC Place Vancouver': { stadium: 'BC Place', city: 'Vancouver', country: 'Canada' },
+  'Boston Stadium': { stadium: 'Gillette Stadium', city: 'Boston', country: 'United States' },
+  'Dallas Stadium': { stadium: 'AT&T Stadium', city: 'Dallas', country: 'United States' },
+  'Guadalajara Stadium': { stadium: 'Estadio Akron', city: 'Guadalajara', country: 'Mexico' },
+  'Houston Stadium': { stadium: 'NRG Stadium', city: 'Houston', country: 'United States' },
+  'Kansas City Stadium': { stadium: 'Arrowhead Stadium', city: 'Kansas City', country: 'United States' },
+  'Los Angeles Stadium': { stadium: 'SoFi Stadium', city: 'Los Angeles', country: 'United States' },
+  'Mexico City Stadium': { stadium: 'Estadio Azteca', city: 'Mexico City', country: 'Mexico' },
+  'Miami Stadium': { stadium: 'Hard Rock Stadium', city: 'Miami', country: 'United States' },
+  'Monterrey Stadium': { stadium: 'Estadio BBVA', city: 'Monterrey', country: 'Mexico' },
+  'New York/New Jersey Stadium': { stadium: 'MetLife Stadium', city: 'New York/New Jersey', country: 'United States' },
+  'Philadelphia Stadium': { stadium: 'Lincoln Financial Field', city: 'Philadelphia', country: 'United States' },
+  'San Francisco Bay Area Stadium': {
+    stadium: 'Levi’s Stadium',
+    city: 'San Francisco Bay Area',
+    country: 'United States'
+  },
+  'Seattle Stadium': { stadium: 'Lumen Field', city: 'Seattle', country: 'United States' },
+  'Toronto Stadium': { stadium: 'BMO Field', city: 'Toronto', country: 'Canada' }
+};
+
 function buildAllMatches() {
   return Array.from({ length: 104 }, (_, idx) => {
     const matchNumber = idx + 1;
@@ -103,13 +126,13 @@ function buildAllMatches() {
       awayTeam: teams.awayTeam,
       stadium: seeded?.stadium || 'Official FIFA venue (see source link)',
       city: seeded?.city || 'TBD',
-      country: seeded?.country || 'TBD',
+      country: seeded?.country || 'Canada, Mexico, or United States (TBD host country)',
       source: seeded?.source || 'FIFA official schedule update (Dec 6, 2025)'
     };
   });
 }
 
-const matches = buildAllMatches();
+let matches = buildAllMatches();
 
 const countryCodeByTeam = {
   Mexico: 'MX',
@@ -123,6 +146,63 @@ const countryCodeByTeam = {
   'Winner SF1': 'UN',
   'Winner SF2': 'UN'
 };
+
+const countryByTeam = {
+  Mexico: 'Mexico',
+  'South Africa': 'South Africa',
+  USA: 'United States',
+  'Korea Republic': 'South Korea'
+};
+
+function countryForTeam(team) {
+  if (!team) return null;
+  if (countryByTeam[team]) return countryByTeam[team];
+
+  if (
+    /^(\d[A-L]|[123][A-Z]+|Winner|Loser|Group|To be announced|TBD|\d)/i.test(team) ||
+    team.includes('(') ||
+    team.includes('#')
+  ) {
+    return null;
+  }
+
+  return team;
+}
+
+function normalizeOfficialFeedMatch(rawMatch) {
+  const matchNumber = Number(rawMatch.MatchNumber);
+  const stage = stageForMatch(matchNumber);
+  const location = locationMetadata[rawMatch.Location] || {};
+  const rawUtc = String(rawMatch.DateUtc || '').trim().replace(' ', 'T');
+  const normalizedUtc = rawUtc.endsWith('Z') ? rawUtc : `${rawUtc}Z`;
+
+  return {
+    id: matchNumber,
+    matchNumber,
+    utcKickoff: new Date(normalizedUtc).toISOString(),
+    stage,
+    homeTeam: rawMatch.HomeTeam || `TBD (${stage}) #${matchNumber}A`,
+    awayTeam: rawMatch.AwayTeam || `TBD (${stage}) #${matchNumber}B`,
+    stadium: location.stadium || rawMatch.Location || 'Official FIFA venue (see source link)',
+    city: location.city || 'TBD',
+    country: location.country || 'Canada, Mexico, or United States (TBD host country)',
+    source: 'Fixture feed synced with FIFA 2026 schedule structure'
+  };
+}
+
+async function loadOfficialSchedule() {
+  try {
+    const response = await fetch('https://fixturedownload.com/feed/json/fifa-world-cup-2026');
+    if (!response.ok) throw new Error(`Schedule feed request failed (${response.status})`);
+    const payload = await response.json();
+    if (!Array.isArray(payload) || payload.length === 0) throw new Error('Empty schedule feed');
+
+    return payload.map(normalizeOfficialFeedMatch).sort((a, b) => a.matchNumber - b.matchNumber);
+  } catch (error) {
+    console.warn('Using built-in fallback schedule data:', error);
+    return buildAllMatches();
+  }
+}
 
 const countryFilter = document.getElementById('country-filter');
 const scheduleList = document.getElementById('schedule-list');
@@ -143,10 +223,6 @@ function getTeamLabel(team) {
   return `${flag} ${team}`;
 }
 
-function isCountryTeam(team) {
-  return countryCodeByTeam[team] && countryCodeByTeam[team] !== 'UN';
-}
-
 function getLocalKickoff(utcString) {
   const date = new Date(utcString);
   return date.toLocaleString(undefined, {
@@ -160,16 +236,35 @@ function getLocalKickoff(utcString) {
 
 function buildMatchCard(match) {
   const article = document.createElement('article');
-  article.className = 'match-card';
+  article.className = 'match-card search-style-card';
+  const kickoff = new Date(match.utcKickoff);
+  const kickoffTime = kickoff.toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit'
+  });
 
   article.innerHTML = `
+    <div class="fixture-top">
+      <p class="fixture-time">${kickoffTime}</p>
+      <p class="fixture-stage">${match.stage}</p>
+    </div>
     <h3 class="match-title">${getTeamLabel(match.homeTeam)} vs ${getTeamLabel(match.awayTeam)}</h3>
-    <p class="match-meta"><strong>Match:</strong> #${match.matchNumber} · ${match.stage}</p>
-    <p class="match-meta"><strong>Venue:</strong> ${match.stadium}, ${match.city}</p>
-    <p class="match-kickoff">Kickoff: ${getLocalKickoff(match.utcKickoff)}</p>
+    <p class="match-meta"><strong>Match:</strong> #${match.matchNumber}</p>
+    <p class="match-meta"><strong>Venue:</strong> ${match.stadium}, ${match.city}, ${match.country}</p>
+    <p class="match-kickoff">${getLocalKickoff(match.utcKickoff)}</p>
   `;
 
   return article;
+}
+
+function getLocalDateLabel(utcString) {
+  const date = new Date(utcString);
+  return date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
 }
 
 function renderSchedule() {
@@ -177,7 +272,14 @@ function renderSchedule() {
   const filtered =
     selected === 'all'
       ? matches
-      : matches.filter((match) => match.homeTeam === selected || match.awayTeam === selected);
+      : matches.filter(
+          (match) =>
+            match.country === selected ||
+            countryForTeam(match.homeTeam) === selected ||
+            countryForTeam(match.awayTeam) === selected ||
+            match.homeTeam === selected ||
+            match.awayTeam === selected
+        );
 
   scheduleList.innerHTML = '';
   if (!filtered.length) {
@@ -186,22 +288,68 @@ function renderSchedule() {
   }
 
   scheduleEmpty.hidden = true;
-  filtered.forEach((match) => scheduleList.appendChild(buildMatchCard(match)));
+  const groupedByDay = new Map();
+  filtered
+    .slice()
+    .sort((a, b) => new Date(a.utcKickoff) - new Date(b.utcKickoff))
+    .forEach((match) => {
+      const key = getLocalDateLabel(match.utcKickoff);
+      if (!groupedByDay.has(key)) groupedByDay.set(key, []);
+      groupedByDay.get(key).push(match);
+    });
+
+  groupedByDay.forEach((dayMatches, dayLabel) => {
+    const section = document.createElement('section');
+    section.className = 'day-group';
+
+    const heading = document.createElement('h3');
+    heading.className = 'day-heading';
+    heading.textContent = dayLabel;
+    section.appendChild(heading);
+
+    const list = document.createElement('div');
+    list.className = 'day-match-list';
+    dayMatches.forEach((match) => list.appendChild(buildMatchCard(match)));
+
+    section.appendChild(list);
+    scheduleList.appendChild(section);
+  });
 }
 
 function buildCountryFilter() {
-  const teams = new Set();
+  const options = new Map();
   matches.forEach((match) => {
-    if (isCountryTeam(match.homeTeam)) teams.add(match.homeTeam);
-    if (isCountryTeam(match.awayTeam)) teams.add(match.awayTeam);
+    const homeTeam = match.homeTeam;
+    const awayTeam = match.awayTeam;
+    const homeCountry = countryForTeam(match.homeTeam);
+    const awayCountry = countryForTeam(match.awayTeam);
+    const hostCountry = match.country;
+
+    if (hostCountry) {
+      options.set(hostCountry, `🌎 ${hostCountry}`);
+    }
+
+    if (homeCountry) {
+      options.set(homeCountry, homeCountry);
+    } else {
+      options.set(homeTeam, `🏳️ ${homeTeam}`);
+    }
+
+    if (awayCountry) {
+      options.set(awayCountry, awayCountry);
+    } else {
+      options.set(awayTeam, `🏳️ ${awayTeam}`);
+    }
   });
 
-  [...teams].sort().forEach((team) => {
-    const option = document.createElement('option');
-    option.value = team;
-    option.textContent = getTeamLabel(team);
-    countryFilter.appendChild(option);
-  });
+  [...options.entries()]
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      countryFilter.appendChild(option);
+    });
 }
 
 function setupSeoSportsEvents() {
@@ -233,11 +381,21 @@ function setupSeoSportsEvents() {
 }
 
 function setupScheduleNote() {
+  const participatingCountries = new Set();
+  matches.forEach((match) => {
+    const homeCountry = countryForTeam(match.homeTeam);
+    const awayCountry = countryForTeam(match.awayTeam);
+    if (homeCountry) participatingCountries.add(homeCountry);
+    if (awayCountry) participatingCountries.add(awayCountry);
+  });
+  const sortedCountries = [...participatingCountries].sort((a, b) => a.localeCompare(b));
+
   scheduleNote.textContent =
-    'Showing all 104 FIFA match numbers (1–104). Anchor fixture details are mapped from the official Dec 6, 2025 schedule update source links on this page.';
+    `Showing all 104 FIFA match numbers (1–104). Countries detected from scheduled teams (${participatingCountries.size}): ${sortedCountries.join(', ')}.`;
 }
 
-function init() {
+async function init() {
+  matches = await loadOfficialSchedule();
   buildCountryFilter();
   setupSeoSportsEvents();
   setupScheduleNote();
